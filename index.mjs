@@ -2,9 +2,17 @@ import polka from "polka";
 import dotenv from "dotenv";
 import parser from "body-parser";
 import cors from "cors";
+import admin from "firebase-admin";
 dotenv.config();
 
 const PORT = process.env.PORT || 80;
+
+admin.initializeApp({
+  credential: admin.credential.cert(
+    JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+  ),
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+});
 
 polka()
   .use(cors(), parser.urlencoded({ extended: true }), parser.json())
