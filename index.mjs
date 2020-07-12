@@ -28,9 +28,9 @@ polka()
 
     // Add item to database
     collectionRef
-      .add({ foo: "bar" })
-      .then(() => {
-        res.end(JSON.stringify({ success: true }));
+      .add(body)
+      .then((result) => {
+        res.end(JSON.stringify({ success: true, id: result.id }));
       })
       .catch((error) => {
         console.log(error);
