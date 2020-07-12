@@ -1,5 +1,5 @@
 {
-  "name": "koj-tracker",
+  "name": "koj-api",
   "version": "0.0.0",
   "description": "Analytics tracking server for Koj's website",
   "main": "index.mjs",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/koj-co/tracker.git"
+    "url": "git+https://github.com/koj-co/api.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/koj-co/tracker/issues"
+    "url": "https://github.com/koj-co/api/issues"
   },
-  "homepage": "https://github.com/koj-co/tracker#readme",
+  "homepage": "https://github.com/koj-co/api#readme",
   "devDependencies": {
     "@semantic-release/git": "^9.0.0",
     "@types/polka": "^0.5.1",
