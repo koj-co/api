@@ -28,7 +28,26 @@ polka()
 
     // Add item to database
     collectionRef
-      .add(body)
+      .add(data)
+      .then((result) => {
+        res.end(JSON.stringify({ success: true, id: result.id }));
+      })
+      .catch((error) => {
+        console.log(error);
+        res.end(JSON.stringify({ success: false }));
+      });
+  })
+  .patch("/:id", (req, res) => {
+    // Get data from query and body
+    const data = { ...req.query, ...req.body, updatedAt: new Date() };
+
+    // Get collection reference
+    let collectionRef = admin.firestore().collection("subscribers-v2");
+
+    // Add item to database
+    collectionRef
+      .doc(req.params.id)
+      .update(data)
       .then((result) => {
         res.end(JSON.stringify({ success: true, id: result.id }));
       })
