@@ -22,8 +22,20 @@ polka()
   .post("/", (req, res) => {
     // Get data from query and body
     const data = { ...req.query, ...req.body, date: new Date() };
-    // Send OK response
-    res.end("OK");
+
+    // Get collection reference
+    let collectionRef = admin.firestore().collection("subscribers-v2");
+
+    // Add item to database
+    collectionRef
+      .add({ foo: "bar" })
+      .then(() => {
+        res.end(JSON.stringify({ success: true }));
+      })
+      .catch((error) => {
+        console.log(error);
+        res.end(JSON.stringify({ success: false }));
+      });
   })
   .listen(PORT, (error) => {
     if (error) throw error;
