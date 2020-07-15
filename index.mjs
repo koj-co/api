@@ -2,10 +2,18 @@ import polka from "polka";
 import dotenv from "dotenv";
 import parser from "body-parser";
 import cors from "cors";
+import cloudinary from "cloudinary";
 import admin from "firebase-admin";
+import multer from "multer";
 dotenv.config();
 
 const PORT = process.env.PORT || 80;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 admin.initializeApp({
   credential: admin.credential.cert(
@@ -15,9 +23,18 @@ admin.initializeApp({
 });
 
 polka()
-  .use(cors(), parser.urlencoded({ extended: true }), parser.json())
+  .use(cors(), parser.urlencoded({ extended: true }), parser.json(), multer())
   .get("/", (req, res) => {
     res.end("/POST");
+  })
+  .post("/upload", (req, res) => {
+    console.log(req);
+    // cloudinary.v2.uploader.upload("/home/my_image.jpg", function (
+    //   error,
+    //   result
+    // ) {
+    //   console.log(result, error);
+    // });
   })
   .post("/", (req, res) => {
     // Get data from query and body
