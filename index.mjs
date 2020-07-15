@@ -22,13 +22,16 @@ admin.initializeApp({
   databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
+const upload = multer();
+
 polka()
-  .use(cors(), parser.urlencoded({ extended: true }), parser.json(), multer())
+  .use(cors(), parser.urlencoded({ extended: true }), parser.json())
   .get("/", (req, res) => {
     res.end("/POST");
   })
-  .post("/upload", (req, res) => {
-    console.log(req);
+  .post("/upload", upload.array("files", 100), (req, res) => {
+    console.log(req.files);
+    res.end(JSON.stringify({ success: false }));
     // cloudinary.v2.uploader.upload("/home/my_image.jpg", function (
     //   error,
     //   result
