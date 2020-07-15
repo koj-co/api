@@ -5,6 +5,7 @@ import cors from "cors";
 import cloudinary from "cloudinary";
 import admin from "firebase-admin";
 import multer from "multer";
+import streamifier from "streamifier";
 dotenv.config();
 
 const PORT = process.env.PORT || 80;
@@ -24,20 +25,37 @@ admin.initializeApp({
 
 const upload = multer();
 
+const uploadFromBuffer = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const cld_upload_stream = cloudinary.v2.uploader.upload_stream(
+      { folder: "onboarding-uploads" },
+      (error, result) => {
+        if (result) return resolve(result);
+        reject(error);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(cld_upload_stream);
+  });
+};
+
 polka()
   .use(cors(), parser.urlencoded({ extended: true }), parser.json())
   .get("/", (req, res) => {
     res.end("/POST");
   })
-  .post("/upload", upload.array("files", 100), (req, res) => {
-    console.log(req.files);
-    res.end(JSON.stringify({ success: false }));
-    // cloudinary.v2.uploader.upload("/home/my_image.jpg", function (
-    //   error,
-    //   result
-    // ) {
-    //   console.log(result, error);
-    // });
+  .post("/upload", upload.array("files", 100), async (req, res) => {
+    const urls = [];
+    for await (const file of req.files) {
+      const result = await uploadFromBuffer(file.buffer);
+      if (result.secure_url)
+        urls.push(
+          result.secure_url.replace(
+            "https://res.cloudinary.com",
+            "https://cdn.koj.co"
+          )
+        );
+    }
+    res.end(JSON.stringify({ success: true, urls }));
   })
   .post("/", (req, res) => {
     // Get data from query and body
