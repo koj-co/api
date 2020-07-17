@@ -11,6 +11,7 @@ The following environment variables are required:
 
 - `FIREBASE_DATABASE_URL` is the full Firebase database URL
 - `FIREBASE_SERVICE_ACCOUNT` is the service account key in JSON
+- `TWT_SECRET` is the secret used to sign [TWTs](https://github.com/koj-co/twt)
 
 Locally, these environment variables are loaded from a `.env`. This repository also uses GitHub Actions CI/CD and triggers an endpoint for deployment from the `master` branch. Optionally, you may add the required environment variables as repository secrets (see [Creating and storing encrypted secrets](https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets)).
 
