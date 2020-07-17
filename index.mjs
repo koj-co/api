@@ -4,7 +4,7 @@ import parser from "body-parser";
 import cors from "cors";
 import cloudinary from "cloudinary";
 import admin from "firebase-admin";
-import { sign, verify } from "twt";
+import twt from "twt";
 import multer from "multer";
 import streamifier from "streamifier";
 dotenv.config();
@@ -71,7 +71,7 @@ polka()
       .add(data)
       .then((result) => {
         res.end(
-          JSON.stringify({ success: true, id: sign(result.id, TWT_SECRET) })
+          JSON.stringify({ success: true, id: twt.sign(result.id, TWT_SECRET) })
         );
       })
       .catch((error) => {
@@ -88,7 +88,7 @@ polka()
 
     let documentId = "";
     try {
-      documentId = verify(req.params.id, TWT_SECRET);
+      documentId = twt.verify(req.params.id, TWT_SECRET);
     } catch (error) {}
     if (!documentId)
       return res.end(
