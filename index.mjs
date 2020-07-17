@@ -4,11 +4,13 @@ import parser from "body-parser";
 import cors from "cors";
 import cloudinary from "cloudinary";
 import admin from "firebase-admin";
+import { sign, verify } from "twt";
 import multer from "multer";
 import streamifier from "streamifier";
 dotenv.config();
 
 const PORT = process.env.PORT || 80;
+const TWT_SECRET = process.env.TWT_SECRET || "";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -68,7 +70,9 @@ polka()
     collectionRef
       .add(data)
       .then((result) => {
-        res.end(JSON.stringify({ success: true, id: result.id }));
+        res.end(
+          JSON.stringify({ success: true, id: sign(result.id, TWT_SECRET) })
+        );
       })
       .catch((error) => {
         console.log(error);
@@ -82,9 +86,18 @@ polka()
     // Get collection reference
     let collectionRef = admin.firestore().collection("subscribers-v2");
 
+    let documentId = "";
+    try {
+      documentId = verify(req.params.id, TWT_SECRET);
+    } catch (error) {}
+    if (!documentId)
+      return res.end(
+        JSON.stringify({ success: false, error: "Invalid token" })
+      );
+
     // Add item to database
     collectionRef
-      .doc(req.params.id)
+      .doc(documentId)
       .update(data)
       .then((result) => {
         res.end(JSON.stringify({ success: true, id: result.id }));
