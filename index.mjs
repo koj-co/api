@@ -52,8 +52,8 @@ polka()
       if (result.secure_url)
         urls.push(
           result.secure_url.replace(
-            "https://res.cloudinary.com",
-            "https://cdn.koj.co"
+            "https://res.cloudinary.com/koj/image/upload",
+            "https://kojcdn.com"
           )
         );
     }
