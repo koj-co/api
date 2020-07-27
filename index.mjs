@@ -79,6 +79,26 @@ polka()
         res.end(JSON.stringify({ success: false }));
       });
   })
+  .post("/real-estate-managers", (req, res) => {
+    // Get data from query and body
+    const data = { ...req.query, ...req.body, date: new Date() };
+
+    // Get collection reference
+    let collectionRef = admin.firestore().collection("real-estate-managers");
+
+    // Add item to database
+    collectionRef
+      .add(data)
+      .then((result) => {
+        res.end(
+          JSON.stringify({ success: true, id: twt.sign(result.id, TWT_SECRET) })
+        );
+      })
+      .catch((error) => {
+        console.log(error);
+        res.end(JSON.stringify({ success: false }));
+      });
+  })
   .patch("/:id", (req, res) => {
     // Get data from query and body
     const data = { ...req.query, ...req.body, updatedAt: new Date() };
