@@ -9,6 +9,9 @@ import multer from "multer";
 import streamifier from "streamifier";
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import ElasticSearch from "@elastic/elasticsearch";
+import AWS from "aws-sdk";
+import createAwsElasticsearchConnector from "aws-elasticsearch-connector";
 dotenv.config();
 
 const PORT = process.env.PORT || 80;
@@ -28,6 +31,16 @@ admin.initializeApp({
     JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
   ),
   databaseURL: process.env.FIREBASE_DATABASE_URL,
+});
+
+const awsConfig = new AWS.Config({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+const client = new ElasticSearch.Client({
+  ...createAwsElasticsearchConnector(awsConfig),
+  node: `https://${process.env.AWS_ELASTIC_HOST}`,
 });
 
 const upload = multer();
@@ -121,10 +134,47 @@ polka()
       }
     });
   })
-  .get("/user-data/:id", (req, res) => {
-    const id = req.params.id;
-    if (!id) res.end(JSON.stringify({ success: false }));
-    res.end(JSON.stringify({ id }));
+  .get("/user-data/:documentId", (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    let authenticated = false;
+    try {
+      authenticated = !!jsonwebtoken.verify(token, JWT_SECRET);
+    } catch (error) {}
+    if (!authenticated) return res.end(JSON.stringify({ success: false }));
+    const documentId = req.params.documentId;
+    const collectionRef = admin.firestore().collection("subscribers-v2");
+    collectionRef
+      .doc(documentId)
+      .get()
+      .then((result) => {
+        const data = result.data() || {};
+        const user_id = data.userId;
+        client
+          .search({
+            index: "analytics-website",
+            body: {
+              query: {
+                match: { user_id },
+              },
+            },
+          })
+          .then((result) => {
+            res.end(
+              JSON.stringify({
+                authenticated,
+                success: true,
+                data,
+                ...((result || {}).body || {}).hits,
+              })
+            );
+          })
+          .catch(() => {
+            res.end(JSON.stringify({ success: false }));
+          });
+      })
+      .catch(() => {
+        res.end(JSON.stringify({ success: false }));
+      });
   })
   .patch("/:id", (req, res) => {
     // Get data from query and body
