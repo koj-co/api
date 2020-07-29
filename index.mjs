@@ -7,6 +7,7 @@ import admin from "firebase-admin";
 import twt from "twt";
 import multer from "multer";
 import streamifier from "streamifier";
+import bcrypt from "bcrypt";
 dotenv.config();
 
 const PORT = process.env.PORT || 80;
@@ -102,17 +103,17 @@ polka()
         res.end(JSON.stringify({ success: false }));
       });
   })
-  .get("/admin-login", (req, res) => {
-    // Get data from query and body
-    res.end(ROOT_PASSWORD);
-  })
   .post("/admin-login", (req, res) => {
     // Get data from query and body
     const data = { ...req.query, ...req.body, date: new Date() };
 
-    if (data.username === ROOT_USERNAME && data.password === ROOT_PASSWORD) {
-      //
-    }
+    bcrypt.compare(data.password, ROOT_PASSWORD, function (err, result) {
+      if (result === true && data.username === ROOT_USERNAME) {
+        res.end(JSON.stringify({ success: true }));
+      } else {
+        res.end(JSON.stringify({ success: false }));
+      }
+    });
   })
   .patch("/:id", (req, res) => {
     // Get data from query and body
