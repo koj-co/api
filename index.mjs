@@ -189,7 +189,18 @@ polka()
       .get()
       .then((result) => {
         const data = [];
-        result.forEach((item) => data.push(item));
+        result.forEach((item) => {
+          const { email, name, date, locationName, budget } = item.data();
+          if (email)
+            data.push({
+              id: item.id,
+              email,
+              name,
+              date: new Date(date._seconds * 1000),
+              locationName,
+              budget,
+            });
+        });
         res.end(
           JSON.stringify({
             authenticated,
