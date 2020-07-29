@@ -152,6 +152,7 @@ polka()
         client
           .search({
             index: "analytics-website",
+            size: 100,
             body: {
               query: {
                 match: { user_id },
