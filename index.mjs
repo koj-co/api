@@ -7,6 +7,7 @@ import admin from "firebase-admin";
 import twt from "twt";
 import multer from "multer";
 import streamifier from "streamifier";
+import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
 dotenv.config();
 
@@ -109,11 +110,21 @@ polka()
 
     bcrypt.compare(data.password, ROOT_PASSWORD, function (err, result) {
       if (result === true && data.username === ROOT_USERNAME) {
-        res.end(JSON.stringify({ success: true }));
+        res.end(
+          JSON.stringify({
+            success: true,
+            token: jsonwebtoken.sign({}, JWT_SECRET, { expiresIn: "7d" }),
+          })
+        );
       } else {
         res.end(JSON.stringify({ success: false }));
       }
     });
+  })
+  .get("/user-data/:id", (req, res) => {
+    const id = req.params.id;
+    if (!id) res.end(JSON.stringify({ success: false }));
+    res.end(JSON.stringify({ id }));
   })
   .patch("/:id", (req, res) => {
     // Get data from query and body
