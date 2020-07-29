@@ -176,6 +176,33 @@ polka()
         res.end(JSON.stringify({ success: false }));
       });
   })
+  .get("/customers", (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    let authenticated = false;
+    try {
+      authenticated = !!jsonwebtoken.verify(token, JWT_SECRET);
+    } catch (error) {}
+    if (!authenticated) return res.end(JSON.stringify({ success: false }));
+    const collectionRef = admin.firestore().collection("subscribers-v2");
+    collectionRef
+      .orderBy("date", "desc")
+      .get()
+      .then((result) => {
+        const data = [];
+        result.forEach((item) => data.push(item));
+        res.end(
+          JSON.stringify({
+            authenticated,
+            success: true,
+            data,
+          })
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+        res.end(JSON.stringify({ success: false }));
+      });
+  })
   .patch("/:id", (req, res) => {
     // Get data from query and body
     const data = { ...req.query, ...req.body, updatedAt: new Date() };
