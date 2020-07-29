@@ -154,6 +154,7 @@ polka()
             index: "analytics-website",
             size: 100,
             body: {
+              sort: "date",
               query: {
                 match: { user_id },
               },
