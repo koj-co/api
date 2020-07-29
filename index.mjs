@@ -11,6 +11,9 @@ dotenv.config();
 
 const PORT = process.env.PORT || 80;
 const TWT_SECRET = process.env.TWT_SECRET || "";
+const JWT_SECRET = process.env.JWT_SECRET || "";
+const ROOT_USERNAME = process.env.ROOT_USERNAME || "";
+const ROOT_PASSWORD = process.env.ROOT_PASSWORD || "";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -98,6 +101,18 @@ polka()
         console.log(error);
         res.end(JSON.stringify({ success: false }));
       });
+  })
+  .get("/admin-login", (req, res) => {
+    // Get data from query and body
+    res.end(ROOT_PASSWORD);
+  })
+  .post("/admin-login", (req, res) => {
+    // Get data from query and body
+    const data = { ...req.query, ...req.body, date: new Date() };
+
+    if (data.username === ROOT_USERNAME && data.password === ROOT_PASSWORD) {
+      //
+    }
   })
   .patch("/:id", (req, res) => {
     // Get data from query and body
