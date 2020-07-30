@@ -161,10 +161,61 @@ polka()
             },
           })
           .then((result) => {
+            const metadata = {};
+            ((((result || {}).body || {}).hits || {}).hits || []).forEach(
+              (hit) => {
+                [
+                  "user_id",
+                  "user_language",
+                  "version",
+                  "resolution_available_width",
+                  "resolution_available",
+                  "resolution_available_height",
+                  "resolution_width",
+                  "resolution",
+                  "resolution_height",
+                  "original_utm_source",
+                  "original_utm_medium",
+                  "original_utm_campaign",
+                  "user_agent_browser_name",
+                  "user_agent_browser_version",
+                  "user_agent_browser_major",
+                  "user_agent_device_vendor",
+                  "user_agent_device_model",
+                  "user_agent_device_type",
+                  "user_agent_engine_name",
+                  "user_agent_engine_version",
+                  "user_agent_os_name",
+                  "user_agent_os_version",
+                  "location_city_geoname_id",
+                  "location_city_names_en",
+                  "location_continent_code",
+                  "location_continent_geoname_id",
+                  "location_continent_names_en",
+                  "location_country_geoname_id",
+                  "location_country_iso_code",
+                  "location_country_names_en",
+                  "location_location_accuracy_radius",
+                  "location_location_latitude",
+                  "location_location_longitude",
+                  "location_location_time_zone",
+                  "location_postal_code",
+                  "location_registered_country_geoname_id",
+                  "location_registered_country_iso_code",
+                  "location_registered_country_names_en",
+                  "location_subdivisions_0_geoname_id",
+                  "location_subdivisions_0_iso_code",
+                  "location_subdivisions_0_names_en",
+                ].forEach((key) => {
+                  metadata[key] = metadata[key] || hit[key];
+                });
+              }
+            );
             res.end(
               JSON.stringify({
                 authenticated,
                 success: true,
+                metadata,
                 data,
                 ...((result || {}).body || {}).hits,
               })
