@@ -207,7 +207,7 @@ polka()
                   "location_subdivisions_0_iso_code",
                   "location_subdivisions_0_names_en",
                 ].forEach((key) => {
-                  metadata[key] = metadata[key] || hit[key];
+                  metadata[key] = metadata[key] || hit._source[key];
                 });
               }
             );
