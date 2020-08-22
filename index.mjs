@@ -67,6 +67,7 @@ const uploadFromBuffer = (buffer) => {
 polka()
   .use(cors(), parser.urlencoded({ extended: true }), parser.json())
   .get("/", (req, res) => {
+    res.setHeader("Cache-Control", "Cache-Control: max-age=86400, public");
     res.end("/POST");
   })
   .get("/autocomplete", async (req, res) => {
@@ -77,6 +78,7 @@ polka()
       countries: ["ch"],
       language: (req.query.lang || "").split("-")[0],
     });
+    res.setHeader("Cache-Control", "Cache-Control: max-age=86400, public");
     res.end(JSON.stringify(results));
   })
   .post("/upload", upload.array("files", 100), async (req, res) => {
