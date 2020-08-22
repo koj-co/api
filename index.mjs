@@ -11,6 +11,7 @@ import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import ElasticSearch from "@elastic/elasticsearch";
 import AWS from "aws-sdk";
+import algoliasearch from "algoliasearch";
 import createAwsElasticsearchConnector from "aws-elasticsearch-connector";
 dotenv.config();
 
@@ -25,6 +26,11 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+const placesClient = algoliasearch.initPlaces(
+  process.env.ALGOLIA_APPLICATION_ID,
+  process.env.ALGOLIA_SEARCH_ONLY_KEY
+);
 
 admin.initializeApp({
   credential: admin.credential.cert(
@@ -62,6 +68,16 @@ polka()
   .use(cors(), parser.urlencoded({ extended: true }), parser.json())
   .get("/", (req, res) => {
     res.end("/POST");
+  })
+  .get("/autocomplete", async (req, res) => {
+    const results = await placesClient.search({
+      query: req.query.q,
+      aroundLatLngViaIP: true,
+      hitsPerPage: 5,
+      countries: ["ch"],
+      language: (req.query.lang || "").split("-")[0],
+    });
+    res.end(JSON.stringify(results));
   })
   .post("/upload", upload.array("files", 100), async (req, res) => {
     const urls = [];
