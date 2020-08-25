@@ -71,6 +71,14 @@ const uploadFromBuffer = (buffer) => {
   });
 };
 
+const toTitleCase = (phrase) => {
+  return phrase
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 polka()
   .use(cors(), parser.urlencoded({ extended: true }), parser.json())
   .get("/", (req, res) => {
@@ -316,13 +324,15 @@ polka()
         });
       });
     });
-    let html = `<h2><strong>Intro call</strong></h2>`;
+    let html = `<h2><strong>Intro Call</strong></h2>`;
     delete data.userId;
     delete data.sessionId;
     Object.keys(data).forEach((category) => {
-      html += `<h3><strong>${category}</strong></h3>`;
+      if (category !== "intro")
+        html += `<h3><strong>${toTitleCase(category)}</strong></h3>`;
       Object.keys(data[category]).forEach((id) => {
-        html += `<h4><strong>${id}</strong></h4>`;
+        if (id !== "intro")
+          html += `<h4><strong>${toTitleCase(id)}</strong></h4>`;
         html += "<ul>";
         data[category][id].forEach((item) => {
           if (item.value || item.details)
