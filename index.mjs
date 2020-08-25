@@ -254,6 +254,22 @@ polka()
         res.end(JSON.stringify({ success: false }));
       });
   })
+  .get("/leads", (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    let authenticated = false;
+    try {
+      authenticated = !!jsonwebtoken.verify(token, JWT_SECRET);
+    } catch (error) {}
+    if (!authenticated) return res.end(JSON.stringify({ success: false }));
+    api
+      .get(`/deals?api_token=${PIPEDRIVE_API_KEY}`)
+      .then((response) => {
+        res.end(JSON.stringify({ success: true, leads: response.data.data }));
+      })
+      .catch(() => {
+        res.end(JSON.stringify({ success: false }));
+      });
+  })
   .get("/leads/:id", (req, res) => {
     const token = (req.headers.authorization || "").replace("Bearer ", "");
     let authenticated = false;
