@@ -247,6 +247,14 @@ polka()
         res.end(JSON.stringify({ success: false }));
       });
   })
+  .get("/leads/:id", (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    let authenticated = false;
+    try {
+      authenticated = !!jsonwebtoken.verify(token, JWT_SECRET);
+    } catch (error) {}
+    if (!authenticated) return res.end(JSON.stringify({ success: false }));
+  })
   .get("/customers", (req, res) => {
     const token = (req.headers.authorization || "").replace("Bearer ", "");
     let authenticated = false;
