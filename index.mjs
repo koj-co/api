@@ -10,6 +10,7 @@ import streamifier from "streamifier";
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import ElasticSearch from "@elastic/elasticsearch";
+import axios from "axios";
 import AWS from "aws-sdk";
 import algoliasearch from "algoliasearch";
 import createAwsElasticsearchConnector from "aws-elasticsearch-connector";
@@ -20,6 +21,12 @@ const TWT_SECRET = process.env.TWT_SECRET || "";
 const JWT_SECRET = process.env.JWT_SECRET || "";
 const ROOT_USERNAME = process.env.ROOT_USERNAME || "";
 const ROOT_PASSWORD = process.env.ROOT_PASSWORD || "";
+const PIPEDRIVE_API_KEY = process.env.PIPEDRIVE_API_KEY;
+const BASE_URL = "https://koj.pipedrive.com/api/v1";
+
+const api = axios.create({
+  baseURL: BASE_URL,
+});
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -254,6 +261,14 @@ polka()
       authenticated = !!jsonwebtoken.verify(token, JWT_SECRET);
     } catch (error) {}
     if (!authenticated) return res.end(JSON.stringify({ success: false }));
+    api
+      .get(`/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`)
+      .then((response) => {
+        res.end(JSON.stringify({ success: true, lead: response.data.data }));
+      })
+      .catch(() => {
+        res.end(JSON.stringify({ success: false }));
+      });
   })
   .get("/customers", (req, res) => {
     const token = (req.headers.authorization || "").replace("Bearer ", "");
