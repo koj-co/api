@@ -79,6 +79,42 @@ const toTitleCase = (phrase) => {
     .join(" ");
 };
 
+const createSlackChannel = async (name) => {
+  try {
+    const { data } = await axios.post(
+      "https://slack.com/api/conversations.create",
+      {
+        name,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.SLACK_BOT_ACCESS_TOKEN}`,
+        },
+      }
+    );
+    await axios.post(
+      "https://slack.com/api/conversations.invite",
+      {
+        channel: data.channel.id,
+        users: [
+          "U013KLNLY86",
+          "UPCE2RE3A",
+          "U010V7MHNRZ",
+          "U019CDKKJE6",
+        ].join(),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.SLACK_BOT_ACCESS_TOKEN}`,
+        },
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+createSlackChannel();
+
 polka()
   .use(cors(), parser.urlencoded({ extended: true }), parser.json())
   .get("/", (req, res) => {
