@@ -280,6 +280,14 @@ polka()
     api
       .get(`/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`)
       .then((response) => {
+        try {
+          if (response.data.data["2d708892b623a93d35eb649f4c730f61107c3125"])
+            response.data.data[
+              "2d708892b623a93d35eb649f4c730f61107c3125"
+            ] = response.data.data[
+              "2d708892b623a93d35eb649f4c730f61107c3125"
+            ].split(",");
+        } catch (error) {}
         res.end(JSON.stringify({ success: true, lead: response.data.data }));
       })
       .catch(() => {
@@ -294,16 +302,50 @@ polka()
     } catch (error) {}
     if (!authenticated) return res.end(JSON.stringify({ success: false }));
     const data = req.body;
-    if (!data.details || !data.note)
-      return res.end(JSON.stringify({ success: false, error: "Data missing" }));
+    const details = {};
+    Object.keys(data).forEach((category) => {
+      Object.keys(data[category]).forEach((id) => {
+        data[category][id].forEach((item) => {
+          if (item.field) {
+            details[item.field] = item.value;
+            // Multiple select are comma-separated
+            if (item.field === "2d708892b623a93d35eb649f4c730f61107c3125") {
+              details[item.field] = (details[item.field] || []).join(",");
+            }
+          }
+        });
+      });
+    });
+    let html = `<h2><strong>Intro call</strong></h2>`;
+    delete data.userId;
+    delete data.sessionId;
+    Object.keys(data).forEach((category) => {
+      html += `<h3><strong>${category}</strong></h3>`;
+      Object.keys(data[category]).forEach((id) => {
+        html += `<h4><strong>${id}</strong></h4>`;
+        html += "<ul>";
+        data[category][id].forEach((item) => {
+          if (item.value || item.details)
+            html += `<li><em>${item.question}</em> ${
+              typeof item.value === "string" ? item.value.trim() : item.value
+            }${
+              item.details
+                ? `, ${
+                    typeof item.details === "string"
+                      ? item.details.trim()
+                      : item.details
+                  }`
+                : ""
+            }</li>`;
+        });
+        html += "</ul>";
+      });
+    });
     api
-      .put(
-        `/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`,
-        data.details
-      )
+      .put(`/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`, details)
       .then(() =>
-        api.post(`/notes?api_token=${API_KEY}`, {
-          content: data.note,
+        api.post(`/notes?api_token=${PIPEDRIVE_API_KEY}`, {
+          content: html,
           deal_id: req.params.id,
         })
       )
