@@ -286,6 +286,34 @@ polka()
         res.end(JSON.stringify({ success: false }));
       });
   })
+  .patch("/leads/:id", (req, res) => {
+    const token = (req.headers.authorization || "").replace("Bearer ", "");
+    let authenticated = false;
+    try {
+      authenticated = !!jsonwebtoken.verify(token, JWT_SECRET);
+    } catch (error) {}
+    if (!authenticated) return res.end(JSON.stringify({ success: false }));
+    const data = req.body;
+    if (!data.details || !data.note)
+      return res.end(JSON.stringify({ success: false, error: "Data missing" }));
+    api
+      .put(
+        `/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`,
+        data.details
+      )
+      .then(() =>
+        api.post(`/notes?api_token=${API_KEY}`, {
+          content: data.note,
+          deal_id: req.params.id,
+        })
+      )
+      .then(() => {
+        res.end(JSON.stringify({ success: true }));
+      })
+      .catch(() => {
+        res.end(JSON.stringify({ success: false }));
+      });
+  })
   .get("/customers", (req, res) => {
     const token = (req.headers.authorization || "").replace("Bearer ", "");
     let authenticated = false;
