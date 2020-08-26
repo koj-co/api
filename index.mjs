@@ -532,7 +532,6 @@ polka()
           .substr(0, 5),
         duration: "01:00",
       });
-    return res.end(JSON.stringify({ success: true }));
     api
       .put(`/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`, details)
       .then(() =>
