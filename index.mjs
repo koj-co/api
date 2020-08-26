@@ -79,7 +79,7 @@ const toTitleCase = (phrase) => {
     .join(" ");
 };
 
-const createSlackChannel = async (name, pipedriveApi) => {
+const createSlackChannel = async (name, slackHtml) => {
   try {
     await axios.post(
       "https://slack.com/api/conversations.create",
@@ -121,7 +121,19 @@ const createSlackChannel = async (name, pipedriveApi) => {
       "https://slack.com/api/chat.postMessage",
       {
         channel: channel.id,
-        text: `👋 Hey <!channel>, <@UPCE2RE3A> has completed the first sales call with this lead. <@U010V7MHNRZ>, you can start working on the proposal based on the answers in Pipedrive: https://koj.pipedrive.com/pipeline/1/user/${pipedriveApi}, and <@U019CDKKJE6> can start working on the renderings as soon as you're done.`,
+        text: `👋 Hey <!channel>, <@UPCE2RE3A> has completed the first sales call with this lead. <@U010V7MHNRZ>, you can start working on the proposal based on the answers below, and <@U019CDKKJE6> can start working on the renderings as soon as you're done.`,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.SLACK_BOT_ACCESS_TOKEN}`,
+        },
+      }
+    );
+    await axios.post(
+      "https://slack.com/api/chat.postMessage",
+      {
+        channel: channel.id,
+        text: slackHtml,
       },
       {
         headers: {
@@ -380,15 +392,20 @@ polka()
           });
         });
     });
-    let html = `<h2><strong>Intro Call</strong></h2>`;
+    let html = `<h2><strong>Intro Call</strong></h2>\n`;
+    let slackHtml = "";
     Object.keys(data).forEach((category) => {
-      if (category !== "intro")
-        html += `<h3><strong>${toTitleCase(category)}</strong></h3>`;
+      if (category !== "intro") {
+        html += `<h3><strong>${toTitleCase(category)}</strong></h3>\n`;
+        htmslackHtmll += `*${toTitleCase(category)}:*\n`;
+      }
       if (typeof data[category] === "object")
         Object.keys(data[category]).forEach((id) => {
-          if (id !== "intro")
-            html += `<h4><strong>${toTitleCase(id)}</strong></h4>`;
-          html += "<ul>";
+          if (id !== "intro") {
+            html += `<h4><strong>${toTitleCase(id)}</strong></h4>\n`;
+            slackHtml += `• *${toTitleCase(id)}*\n`;
+          }
+          html += "<ul>\n";
           data[category][id].forEach((item) => {
             if (item.value || item.details)
               html += `<li><em>${item.question}</em> ${
@@ -401,9 +418,20 @@ polka()
                         : item.details
                     }`
                   : ""
-              }</li>`;
+              }</li>\n`;
+            slackHtml += `  • _${item.question}_ ${
+              typeof item.value === "string" ? item.value.trim() : item.value
+            }${
+              item.details
+                ? `, ${
+                    typeof item.details === "string"
+                      ? item.details.trim()
+                      : item.details
+                  }`
+                : ""
+            }</li>\n`;
           });
-          html += "</ul>";
+          html += "</ul>\n";
         });
     });
     api
@@ -416,7 +444,7 @@ polka()
       )
       .then(() => {
         try {
-          createSlackChannel(`concept-${req.params.id}`, req.params.id)
+          createSlackChannel(`concept-${req.params.id}`, slackHtml)
             .then(() => {})
             .catch(() => {});
         } catch (error) {}
