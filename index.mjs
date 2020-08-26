@@ -356,8 +356,6 @@ polka()
       });
   })
   .patch("/leads/:id", (req, res) => {
-    delete data.userId;
-    delete data.sessionId;
     const token = (req.headers.authorization || "").replace("Bearer ", "");
     let authenticated = false;
     try {
@@ -365,6 +363,8 @@ polka()
     } catch (error) {}
     if (!authenticated) return res.end(JSON.stringify({ success: false }));
     const data = req.body;
+    delete data.userId;
+    delete data.sessionId;
     const details = {};
     Object.keys(data).forEach((category) => {
       if (typeof data[category] === "object")
