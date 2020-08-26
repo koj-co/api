@@ -79,6 +79,37 @@ const toTitleCase = (phrase) => {
     .join(" ");
 };
 
+const createPipedriveActivity = async ({
+  type,
+  subject,
+  due_date,
+  due_time,
+  duration,
+  user_id,
+  deal_id,
+  note,
+}) => {
+  try {
+    await axios.post(
+      `https://koj.pipedrive.com/api/v1/activities?api_token=${process.env.PIPEDRIVE_API_KEY}`,
+      {
+        subject,
+        done: 0,
+        type, // 1 -> call, 2 -> meeting, 3 -> task, 4 -> deadline, 5 -> email
+        due_date, // YYYY-MM-DD
+        due_time, // HH:mm
+        duration: duration || "00:30", // HH:mm
+        user_id,
+        deal_id,
+        note,
+        busy_flag: true,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const createSlackChannel = async (name, slackHtml) => {
   try {
     await axios.post(
@@ -396,6 +427,8 @@ polka()
     });
     let html = `<h2><strong>Intro Call</strong></h2>\n`;
     let slackHtml = "";
+    let nextMeetingDate = "";
+    let deadlineDate = "";
     Object.keys(data).forEach((category) => {
       if (category !== "intro") {
         html += `<h3><strong>${toTitleCase(category)}</strong></h3>\n`;
@@ -409,6 +442,10 @@ polka()
           }
           html += "<ul>\n";
           data[category][id].forEach((item) => {
+            if (item.question === "When is the next meeting?")
+              nextMeetingDate = new Date(item.value);
+            if (item.question === "What's the deadline for the concept?")
+              deadlineDate = new Date(item.value);
             if (item.value || item.details) {
               html += `<li><em>${item.question}</em> ${
                 typeof item.value === "string"
@@ -441,6 +478,39 @@ polka()
           html += "</ul>\n";
         });
     });
+    if (deadlineDate)
+      createPipedriveActivity({
+        type: 4, // deadline
+        subject: "Proposal deadline",
+        deal_id: req.params.id,
+        due_date: new Date(
+          deadlineDate.getTime() - deadlineDate.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split("T")[0],
+      });
+    if (nextMeetingDate)
+      createPipedriveActivity({
+        type: 1, // call
+        subject: "Proposal call",
+        deal_id: req.params.id,
+        due_date: new Date(
+          nextMeetingDate.getTime() -
+            nextMeetingDate.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split("T")[0],
+        due_time: new Date(
+          nextMeetingDate.getTime() -
+            nextMeetingDate.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split("T")[1]
+          .split("Z")[0]
+          .substr(0, 5),
+        duration: "01:00",
+      });
+    return res.end(JSON.stringify({ success: true }));
     api
       .put(`/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`, details)
       .then(() =>
