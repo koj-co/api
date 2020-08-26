@@ -356,6 +356,8 @@ polka()
       });
   })
   .patch("/leads/:id", (req, res) => {
+    delete data.userId;
+    delete data.sessionId;
     const token = (req.headers.authorization || "").replace("Bearer ", "");
     let authenticated = false;
     try {
@@ -365,44 +367,44 @@ polka()
     const data = req.body;
     const details = {};
     Object.keys(data).forEach((category) => {
-      Object.keys(data[category]).forEach((id) => {
-        ((data[category] || {})[id] || []).forEach((item) => {
-          if (item.field) {
-            details[item.field] = item.value;
-            // Multiple select are comma-separated
-            if (item.field === "2d708892b623a93d35eb649f4c730f61107c3125") {
-              details[item.field] = (details[item.field] || []).join(",");
+      if (typeof data[category] === "object")
+        Object.keys(data[category]).forEach((id) => {
+          ((data[category] || {})[id] || []).forEach((item) => {
+            if (item.field) {
+              details[item.field] = item.value;
+              // Multiple select are comma-separated
+              if (item.field === "2d708892b623a93d35eb649f4c730f61107c3125") {
+                details[item.field] = (details[item.field] || []).join(",");
+              }
             }
-          }
+          });
         });
-      });
     });
     let html = `<h2><strong>Intro Call</strong></h2>`;
-    delete data.userId;
-    delete data.sessionId;
     Object.keys(data).forEach((category) => {
       if (category !== "intro")
         html += `<h3><strong>${toTitleCase(category)}</strong></h3>`;
-      Object.keys(data[category]).forEach((id) => {
-        if (id !== "intro")
-          html += `<h4><strong>${toTitleCase(id)}</strong></h4>`;
-        html += "<ul>";
-        data[category][id].forEach((item) => {
-          if (item.value || item.details)
-            html += `<li><em>${item.question}</em> ${
-              typeof item.value === "string" ? item.value.trim() : item.value
-            }${
-              item.details
-                ? `, ${
-                    typeof item.details === "string"
-                      ? item.details.trim()
-                      : item.details
-                  }`
-                : ""
-            }</li>`;
+      if (typeof data[category] === "object")
+        Object.keys(data[category]).forEach((id) => {
+          if (id !== "intro")
+            html += `<h4><strong>${toTitleCase(id)}</strong></h4>`;
+          html += "<ul>";
+          data[category][id].forEach((item) => {
+            if (item.value || item.details)
+              html += `<li><em>${item.question}</em> ${
+                typeof item.value === "string" ? item.value.trim() : item.value
+              }${
+                item.details
+                  ? `, ${
+                      typeof item.details === "string"
+                        ? item.details.trim()
+                        : item.details
+                    }`
+                  : ""
+              }</li>`;
+          });
+          html += "</ul>";
         });
-        html += "</ul>";
-      });
     });
     api
       .put(`/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`, details)
