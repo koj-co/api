@@ -397,19 +397,21 @@ polka()
     Object.keys(data).forEach((category) => {
       if (category !== "intro") {
         html += `<h3><strong>${toTitleCase(category)}</strong></h3>\n`;
-        htmslackHtmll += `*${toTitleCase(category)}:*\n`;
+        slackHtml += `*${toTitleCase(category)}:*\n`;
       }
       if (typeof data[category] === "object")
         Object.keys(data[category]).forEach((id) => {
           if (id !== "intro") {
             html += `<h4><strong>${toTitleCase(id)}</strong></h4>\n`;
-            slackHtml += `• *${toTitleCase(id)}*\n`;
+            slackHtml += `   • *${toTitleCase(id)}*\n`;
           }
           html += "<ul>\n";
           data[category][id].forEach((item) => {
-            if (item.value || item.details)
+            if (item.value || item.details) {
               html += `<li><em>${item.question}</em> ${
-                typeof item.value === "string" ? item.value.trim() : item.value
+                typeof item.value === "string"
+                  ? item.value.trim()
+                  : item.value || "<em>Unknown</em>"
               }${
                 item.details
                   ? `, ${
@@ -419,17 +421,20 @@ polka()
                     }`
                   : ""
               }</li>\n`;
-            slackHtml += `  • _${item.question}_ ${
-              typeof item.value === "string" ? item.value.trim() : item.value
-            }${
-              item.details
-                ? `, ${
-                    typeof item.details === "string"
-                      ? item.details.trim()
-                      : item.details
-                  }`
-                : ""
-            }</li>\n`;
+              slackHtml += `         • _${item.question}_ ${
+                typeof item.value === "string"
+                  ? item.value.trim()
+                  : item.value || "*Unknown*"
+              }${
+                item.details
+                  ? `, ${
+                      typeof item.details === "string"
+                        ? item.details.trim()
+                        : item.details
+                    }`
+                  : ""
+              }\n`;
+            }
           });
           html += "</ul>\n";
         });
