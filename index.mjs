@@ -381,6 +381,7 @@ polka()
       authenticated = !!jsonwebtoken.verify(token, JWT_SECRET);
     } catch (error) {}
     if (!authenticated) return res.end(JSON.stringify({ success: false }));
+    let lead = null;
     api
       .get(`/deals/${req.params.id}?api_token=${PIPEDRIVE_API_KEY}`)
       .then((response) => {
@@ -392,9 +393,30 @@ polka()
               "2d708892b623a93d35eb649f4c730f61107c3125"
             ].split(",");
         } catch (error) {}
-        res.end(JSON.stringify({ success: true, lead: response.data.data }));
+        lead = response.data.data;
+        if (response.data.data["b4b22c726c33517f3810d338d77c567c8b358da4"]) {
+          const collectionRef = admin.firestore().collection("subscribers-v2");
+          return collectionRef
+            .doc(response.data.data["b4b22c726c33517f3810d338d77c567c8b358da4"])
+            .get();
+        } else {
+          return res.end(
+            JSON.stringify({ success: true, lead: response.data.data })
+          );
+        }
+      })
+      .then((result) => {
+        const firebaseData = result.data() || {};
+        return res.end(
+          JSON.stringify({
+            success: true,
+            lead,
+            firebaseData,
+          })
+        );
       })
       .catch(() => {
+        if (lead) return res.end(JSON.stringify({ success: true, lead }));
         res.end(JSON.stringify({ success: false }));
       });
   })
