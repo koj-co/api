@@ -360,7 +360,7 @@ polka()
     const details = {};
     Object.keys(data).forEach((category) => {
       Object.keys(data[category]).forEach((id) => {
-        data[category][id].forEach((item) => {
+        ((data[category] || {})[id] || []).forEach((item) => {
           if (item.field) {
             details[item.field] = item.value;
             // Multiple select are comma-separated
