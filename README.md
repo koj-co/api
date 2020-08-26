@@ -9,11 +9,31 @@ This repository contains the API server, primarily for communicating with Fireba
 
 ## ⚙️ Configuration
 
-The following environment variables are required:
+The following environment variables are required.
+
+Firebase:
 
 - `FIREBASE_DATABASE_URL` is the full Firebase database URL
 - `FIREBASE_SERVICE_ACCOUNT` is the service account key in JSON
+
+Authentication:
+
 - `TWT_SECRET` is the secret used to sign [TWTs](https://github.com/koj-co/twt)
+- `JWT_SECRET` is the secret used to sign JWTs
+- `ROOT_USERNAME` is the username for logging in
+- `ROOT_PASSWORD` is the hashed password for logging in
+
+AWS-managed ElasticSearch:
+
+- `AWS_ELASTIC_HOST` is the endpoint
+- `AWS_ACCESS_KEY_ID` is the AWS access key
+- `AWS_SECRET_ACCESS_KEY` is the AWS secret key
+- `AWS_REGION` is the AWS region
+
+Sales:
+
+- `PIPEDRIVE_API_KEY` is the Pipedrive CRM API key
+- `SLACK_BOT_ACCESS_TOKEN` is the access token of the Slack bot
 
 Locally, these environment variables are loaded from a `.env`. This repository also uses GitHub Actions CI/CD and triggers an endpoint for deployment from the `master` branch. Optionally, you may add the required environment variables as repository secrets (see [Creating and storing encrypted secrets](https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets)).
 
