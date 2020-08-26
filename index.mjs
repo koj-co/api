@@ -81,7 +81,7 @@ const toTitleCase = (phrase) => {
 
 const createSlackChannel = async (name, pipedriveApi) => {
   try {
-    const { data } = await axios.post(
+    await axios.post(
       "https://slack.com/api/conversations.create",
       {
         name,
@@ -92,10 +92,18 @@ const createSlackChannel = async (name, pipedriveApi) => {
         },
       }
     );
+  } catch (error) {}
+  const { data } = await axios.get("https://slack.com/api/conversations.list", {
+    headers: {
+      Authorization: `Bearer ${process.env.SLACK_BOT_ACCESS_TOKEN}`,
+    },
+  });
+  const channel = data.channels.find((channel) => channel.name === name);
+  if (channel) {
     await axios.post(
       "https://slack.com/api/conversations.invite",
       {
-        channel: data.channel.id,
+        channel: channel.id,
         users: [
           "U013KLNLY86", // Anand
           "UPCE2RE3A", // Caro
@@ -112,8 +120,8 @@ const createSlackChannel = async (name, pipedriveApi) => {
     await axios.post(
       "https://slack.com/api/chat.postMessage",
       {
-        channel: data.channel.id,
-        text: `👋 Hey team, <@UPCE2RE3A> has completed the first sales call with this lead. <@U010V7MHNRZ>, you can start working on the proposal based on the answers in Pipedrive: https://koj.pipedrive.com/pipeline/1/user/${pipedriveApi}, and <@U019CDKKJE6> can start working on the renderings as soon as you're done.`,
+        channel: channel.id,
+        text: `👋 Hey <!channel>, <@UPCE2RE3A> has completed the first sales call with this lead. <@U010V7MHNRZ>, you can start working on the proposal based on the answers in Pipedrive: https://koj.pipedrive.com/pipeline/1/user/${pipedriveApi}, and <@U019CDKKJE6> can start working on the renderings as soon as you're done.`,
       },
       {
         headers: {
@@ -121,8 +129,6 @@ const createSlackChannel = async (name, pipedriveApi) => {
         },
       }
     );
-  } catch (error) {
-    console.log(error);
   }
 };
 
