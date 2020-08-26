@@ -140,6 +140,7 @@ const createSlackChannel = async (name, slackHtml) => {
           "UPCE2RE3A", // Caro
           "U010V7MHNRZ", // Kateryna
           "U019CDKKJE6", // Monica
+          "U019XAFTWJD", // Karina
         ].join(),
       },
       {
