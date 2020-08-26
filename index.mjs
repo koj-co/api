@@ -386,7 +386,9 @@ polka()
               details[item.field] = item.value;
               // Multiple select are comma-separated
               if (item.field === "2d708892b623a93d35eb649f4c730f61107c3125") {
-                details[item.field] = (details[item.field] || []).join(",");
+                details[item.field] = Array.from(
+                  new Set(details[item.field] || [])
+                ).join(",");
               }
             }
           });
