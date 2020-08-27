@@ -465,9 +465,12 @@ polka()
           }
           html += "<ul>\n";
           data[category][id].forEach((item) => {
-            if (item.question === "When is the next meeting?")
+            if (item.value && item.question === "When is the next meeting?")
               nextMeetingDate = new Date(item.value);
-            if (item.question === "What's the deadline for the concept?")
+            if (
+              item.value &&
+              item.question === "What's the deadline for the concept?"
+            )
               deadlineDate = new Date(item.value);
             if (item.value || item.details) {
               html += `<li><em>${item.question}</em> ${
