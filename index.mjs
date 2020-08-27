@@ -110,7 +110,7 @@ const createPipedriveActivity = async ({
   }
 };
 
-const createSlackChannel = async (name, slackHtml) => {
+const createSlackChannel = async (name, slackHtml, deadlineDate) => {
   try {
     await axios.post(
       "https://slack.com/api/conversations.create",
@@ -161,6 +161,21 @@ const createSlackChannel = async (name, slackHtml) => {
         },
       }
     );
+    if (deadlineDate)
+      await axios.post(
+        "https://slack.com/api/chat.postMessage",
+        {
+          channel: channel.id,
+          text: `🗓 *The deadline for this project is ${new Date(
+            deadlineDate
+          ).toLocaleDateString("en-ch", { timeZone: "Europe/Zurich" })}*`,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.SLACK_BOT_ACCESS_TOKEN}`,
+          },
+        }
+      );
     await axios.post(
       "https://slack.com/api/chat.postMessage",
       {
@@ -550,7 +565,11 @@ polka()
       )
       .then(() => {
         try {
-          createSlackChannel(`concept-${req.params.id}`, slackHtml)
+          createSlackChannel(
+            `concept-${req.params.id}`,
+            slackHtml,
+            deadlineDate
+          )
             .then(() => {})
             .catch(() => {});
         } catch (error) {}
