@@ -432,16 +432,19 @@ polka()
     delete data.userId;
     delete data.sessionId;
     const details = {};
-    Object.keys(data).forEach((category) => {
-      if (typeof data[category] === "object")
-        Object.keys(data[category]).forEach((id) => {
-          ((data[category] || {})[id] || []).forEach((item) => {
-            if (item.field) {
-              details[item.field] = item.value;
+    Object.keys(data).forEach((roomType) => {
+      if (typeof data[roomType] === "object")
+        Object.keys(data[roomType]).forEach((roomId) => {
+          Object.keys(data[roomType][roomId]).forEach((questionId) => {
+            const question = data[roomType][roomId][questionId];
+            if (question.field) {
+              details[question.field] = question.value;
               // Multiple select are comma-separated
-              if (item.field === "2d708892b623a93d35eb649f4c730f61107c3125") {
-                details[item.field] = Array.from(
-                  new Set(details[item.field] || [])
+              if (
+                question.field === "2d708892b623a93d35eb649f4c730f61107c3125"
+              ) {
+                details[question.field] = Array.from(
+                  new Set(details[question.field] || [])
                 ).join(",");
               }
             }
@@ -464,7 +467,8 @@ polka()
             slackHtml += `   • *${toTitleCase(id)}*\n`;
           }
           html += "<ul>\n";
-          data[category][id].forEach((item) => {
+          Object.keys(data[category][id]).forEach((questionId) => {
+            const item = data[category][id][questionId];
             if (item.value && item.question === "When is the next meeting?")
               nextMeetingDate = new Date(item.value);
             if (
