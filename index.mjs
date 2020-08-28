@@ -95,7 +95,7 @@ const createPipedriveActivity = async ({
       {
         subject,
         done: 0,
-        type, // 1 -> call, 2 -> meeting, 3 -> task, 4 -> deadline, 5 -> email
+        type,
         due_date, // YYYY-MM-DD
         due_time, // HH:mm
         duration: duration || "00:30", // HH:mm
@@ -541,7 +541,7 @@ polka()
     });
     if (deadlineDate)
       createPipedriveActivity({
-        type: 4, // deadline
+        type: "deadline",
         subject: `Proposal deadline #${req.params.id}`,
         deal_id: req.params.id,
         due_date: new Date(
@@ -552,7 +552,7 @@ polka()
       });
     if (nextMeetingDate)
       createPipedriveActivity({
-        type: 1, // call
+        type: "call",
         subject: `Proposal call #${req.params.id}`,
         deal_id: req.params.id,
         due_date: new Date(
