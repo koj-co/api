@@ -553,7 +553,7 @@ polka()
     if (nextMeetingDate)
       createPipedriveActivity({
         type: "call",
-        subject: `Proposal call #${req.params.id}`,
+        subject: `Proposal presentation #${req.params.id}`,
         deal_id: req.params.id,
         due_date: new Date(
           nextMeetingDate.getTime() -
