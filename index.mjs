@@ -498,9 +498,19 @@ polka()
       }
       if (typeof data[category] === "object")
         Object.keys(data[category]).forEach((id) => {
+          let roomName = toTitleCase(id);
+          Object.keys(data[category][id]).forEach((questionId) => {
+            if (
+              data[category][id][questionId].value &&
+              data[category][id][questionId].question.includes(
+                "name or location"
+              )
+            )
+              roomName = item.value;
+          });
           if (id !== "intro") {
-            html += `<h4><strong>${toTitleCase(id)}</strong></h4>\n`;
-            slackHtml += `   • *${toTitleCase(id)}*\n`;
+            html += `<h4><strong>${roomName}</strong></h4>\n`;
+            slackHtml += `   • *${roomName}*\n`;
           }
           html += "<ul>\n";
           Object.keys(data[category][id]).forEach((questionId) => {
