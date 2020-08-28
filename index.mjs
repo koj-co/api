@@ -110,7 +110,12 @@ const createPipedriveActivity = async ({
   }
 };
 
-const createSlackChannel = async (name, slackHtml, deadlineDate) => {
+const createSlackChannel = async (
+  name,
+  slackHtml,
+  briefingDate,
+  finalConceptDate
+) => {
   try {
     await axios.post(
       "https://slack.com/api/conversations.create",
@@ -161,13 +166,28 @@ const createSlackChannel = async (name, slackHtml, deadlineDate) => {
         },
       }
     );
-    if (deadlineDate)
+    if (briefingDate)
       await axios.post(
         "https://slack.com/api/chat.postMessage",
         {
           channel: channel.id,
-          text: `🗓 *The deadline for this project is ${new Date(
-            deadlineDate
+          text: `🗓 The deadline for the briefing of this project is ${new Date(
+            briefingDate
+          ).toLocaleDateString("en-ch", { timeZone: "Europe/Zurich" })}`,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.SLACK_BOT_ACCESS_TOKEN}`,
+          },
+        }
+      );
+    if (finalConceptDate)
+      await axios.post(
+        "https://slack.com/api/chat.postMessage",
+        {
+          channel: channel.id,
+          text: `🗓 *The final concept deadline for this project, including renders, is ${new Date(
+            briefingDate
           ).toLocaleDateString("en-ch", { timeZone: "Europe/Zurich" })}*`,
         },
         {
@@ -469,7 +489,8 @@ polka()
     let html = `<h2><strong>Intro Call</strong></h2>\n`;
     let slackHtml = "";
     let nextMeetingDate = "";
-    let deadlineDate = "";
+    let briefingDate = "";
+    let finalConceptDate = "";
     Object.keys(data).forEach((category) => {
       if (category !== "intro") {
         html += `<h3><strong>${toTitleCase(category)}</strong></h3>\n`;
@@ -488,9 +509,16 @@ polka()
               nextMeetingDate = new Date(item.value);
             if (
               item.value &&
-              item.question === "What's the deadline for the concept?"
+              item.question ===
+                "What's the deadline for the briefing (no renders)?"
             )
-              deadlineDate = new Date(item.value);
+              briefingDate = new Date(item.value);
+            if (
+              item.value &&
+              item.question ===
+                "What's the deadline for the final concept, including renders?"
+            )
+              finalConceptDate = new Date(item.value);
             if (item.value || item.details) {
               html += `<li><em>${item.question}</em> ${
                 item.type === "date"
@@ -539,13 +567,13 @@ polka()
           html += "</ul>\n";
         });
     });
-    if (deadlineDate)
+    if (briefingDate)
       createPipedriveActivity({
         type: "deadline",
         subject: `Proposal deadline #${req.params.id}`,
         deal_id: req.params.id,
         due_date: new Date(
-          deadlineDate.getTime() - deadlineDate.getTimezoneOffset() * 60000
+          briefingDate.getTime() - briefingDate.getTimezoneOffset() * 60000
         )
           .toISOString()
           .split("T")[0],
@@ -584,7 +612,8 @@ polka()
           createSlackChannel(
             `concept-${req.params.id}`,
             slackHtml,
-            deadlineDate
+            briefingDate,
+            finalConceptDate
           )
             .then(() => {})
             .catch(() => {});
