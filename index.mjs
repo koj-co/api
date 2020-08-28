@@ -569,11 +569,23 @@ polka()
     });
     if (briefingDate)
       createPipedriveActivity({
+        type: "task",
+        subject: `Setup briefing #${req.params.id}`,
+        deal_id: req.params.id,
+        due_date: new Date(
+          briefingDate.getTime() - briefingDate.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split("T")[0],
+      });
+    if (finalConceptDate)
+      createPipedriveActivity({
         type: "deadline",
         subject: `Proposal deadline #${req.params.id}`,
         deal_id: req.params.id,
         due_date: new Date(
-          briefingDate.getTime() - briefingDate.getTimezoneOffset() * 60000
+          finalConceptDate.getTime() -
+            finalConceptDate.getTimezoneOffset() * 60000
         )
           .toISOString()
           .split("T")[0],
