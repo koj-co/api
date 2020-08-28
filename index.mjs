@@ -542,7 +542,7 @@ polka()
     if (deadlineDate)
       createPipedriveActivity({
         type: 4, // deadline
-        subject: "Proposal deadline",
+        subject: `Proposal deadline #${req.params.id}`,
         deal_id: req.params.id,
         due_date: new Date(
           deadlineDate.getTime() - deadlineDate.getTimezoneOffset() * 60000
@@ -553,7 +553,7 @@ polka()
     if (nextMeetingDate)
       createPipedriveActivity({
         type: 1, // call
-        subject: "Proposal call",
+        subject: `Proposal call #${req.params.id}`,
         deal_id: req.params.id,
         due_date: new Date(
           nextMeetingDate.getTime() -
