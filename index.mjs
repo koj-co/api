@@ -493,7 +493,15 @@ polka()
               deadlineDate = new Date(item.value);
             if (item.value || item.details) {
               html += `<li><em>${item.question}</em> ${
-                typeof item.value === "string"
+                item.type === "date"
+                  ? new Date(item.value).toLocaleDateString("en-ch", {
+                      timeZone: "Europe/Zurich",
+                    })
+                  : item.type === "datetime"
+                  ? new Date(item.value).toLocaleString("en-ch", {
+                      timeZone: "Europe/Zurich",
+                    })
+                  : typeof item.value === "string"
                   ? item.value.trim()
                   : item.value || "<em>Unknown</em>"
               }${
@@ -506,9 +514,17 @@ polka()
                   : ""
               }</li>\n`;
               slackHtml += `         • _${item.question}_ ${
-                typeof item.value === "string"
+                item.type === "date"
+                  ? new Date(item.value).toLocaleDateString("en-ch", {
+                      timeZone: "Europe/Zurich",
+                    })
+                  : item.type === "datetime"
+                  ? new Date(item.value).toLocaleString("en-ch", {
+                      timeZone: "Europe/Zurich",
+                    })
+                  : typeof item.value === "string"
                   ? item.value.trim()
-                  : item.value || "*Unknown*"
+                  : item.value || "<em>Unknown</em>"
               }${
                 item.details
                   ? `, ${
