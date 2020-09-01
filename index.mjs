@@ -506,7 +506,7 @@ polka()
                 "name or location"
               )
             )
-              roomName = item.value;
+              roomName = data[category][id][questionId].value;
           });
           if (id !== "intro") {
             html += `<h4><strong>${roomName}</strong></h4>\n`;
