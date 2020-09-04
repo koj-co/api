@@ -187,7 +187,7 @@ const createSlackChannel = async (
         {
           channel: channel.id,
           text: `🗓 *The final concept deadline for this project, including renders, is ${new Date(
-            briefingDate
+            finalConceptDate
           ).toLocaleDateString("en-ch", { timeZone: "Europe/Zurich" })}*`,
         },
         {
