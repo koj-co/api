@@ -144,7 +144,6 @@ const createSlackChannel = async (
           "U013KLNLY86", // Anand
           "UPCE2RE3A", // Caro
           "U010V7MHNRZ", // Kateryna
-          "U019CDKKJE6", // Monica
           "U019XAFTWJD", // Karina
         ].join(),
       },
@@ -158,7 +157,7 @@ const createSlackChannel = async (
       "https://slack.com/api/chat.postMessage",
       {
         channel: channel.id,
-        text: `👋 Hey <!channel>, <@UPCE2RE3A> has completed the first sales call with this lead. <@U010V7MHNRZ>, you can start working on the proposal based on the answers below, and <@U019CDKKJE6> can start working on the renderings as soon as you're done.`,
+        text: `👋 Hey <!channel>, <@UPCE2RE3A> has completed the first sales call with this lead. <@U010V7MHNRZ> and <@U019XAFTWJD>, you can start working on the proposal based on the answers below.`,
       },
       {
         headers: {
