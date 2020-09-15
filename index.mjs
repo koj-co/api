@@ -9,6 +9,7 @@ import multer from "multer";
 import streamifier from "streamifier";
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import Airtable from "airtable";
 import ElasticSearch from "@elastic/elasticsearch";
 import axios from "axios";
 import AWS from "aws-sdk";
@@ -109,6 +110,43 @@ const createPipedriveActivity = async ({
     console.log(error);
   }
 };
+
+const getPipedriveLead = async (deal_id) => {
+  return (
+    await axios.get(
+      `https://koj.pipedrive.com/api/v1/deals/${deal_id}?api_token=${process.env.PIPEDRIVE_API_KEY}`
+    )
+  ).data;
+};
+
+/**
+ * Create a new row for an apartment
+ * @param apartmentId - Apartment ID
+ */
+const createAirtableRow = (apartmentId) =>
+  new Promise((resolve) => {
+    const base = new Airtable({
+      apiKey: process.env.AIRTABLE_API_KEY,
+    }).base(process.env.AIRTABLE_CATALOGUE_BASE);
+    let leadName = "";
+    getPipedriveLead()
+      .then((lead) => {
+        if (lead && lead.data) leadName = lead.data.title;
+      })
+      .catch(() => {})
+      .then(
+        base("Inventory").create([
+          {
+            fields: {
+              ID: apartmentId,
+              Customer: leadName,
+            },
+          },
+        ])
+      )
+      .then(resolve)
+      .catch(resolve);
+  });
 
 const createSlackChannel = async (
   name,
@@ -636,6 +674,13 @@ polka()
             briefingDate,
             finalConceptDate
           )
+            .then(() => {})
+            .catch(() => {});
+        } catch (error) {}
+      })
+      .then(() => {
+        try {
+          createAirtableRow(req.params.id)
             .then(() => {})
             .catch(() => {});
         } catch (error) {}
