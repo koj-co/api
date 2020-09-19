@@ -9,6 +9,7 @@ import multer from "multer";
 import streamifier from "streamifier";
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import Octokit from "@octokit/rest";
 import Airtable from "airtable";
 import ElasticSearch from "@elastic/elasticsearch";
 import axios from "axios";
@@ -23,6 +24,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "";
 const ROOT_USERNAME = process.env.ROOT_USERNAME || "";
 const ROOT_PASSWORD = process.env.ROOT_PASSWORD || "";
 const PIPEDRIVE_API_KEY = process.env.PIPEDRIVE_API_KEY;
+const GITHUB_PAT = process.env.GITHUB_PAT;
 const BASE_URL = "https://koj.pipedrive.com/api/v1";
 
 const api = axios.create({
@@ -55,6 +57,10 @@ const awsConfig = new AWS.Config({
 const client = new ElasticSearch.Client({
   ...createAwsElasticsearchConnector(awsConfig),
   node: `https://${process.env.AWS_ELASTIC_HOST}`,
+});
+
+const github = new Octokit({
+  auth: GITHUB_PAT,
 });
 
 const upload = multer();
@@ -501,6 +507,17 @@ polka()
     } catch (error) {}
     if (!authenticated) return res.end(JSON.stringify({ success: false }));
     const data = req.body;
+    github.repos
+      .createOrUpdateFileContents({
+        owner: "koj-co",
+        repo: "backups",
+        path: `sales-app-responses/${req.params.id}.json`,
+        message: `:card_file_box: Add sales app ${req.params.id}`,
+        content: Buffer.from(JSON.stringify(data, null, 2)).toString("base64"),
+      })
+      .then(() => {})
+      .catch(() => {});
+
     delete data.userId;
     delete data.sessionId;
     const details = {};
