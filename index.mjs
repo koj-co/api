@@ -595,7 +595,7 @@ polka()
                     })
                   : typeof item.value === "string"
                   ? item.value.trim()
-                  : item.value || "<em>Unknown</em>"
+                  : item.value || ""
               }${
                 item.details
                   ? `, ${
@@ -616,7 +616,7 @@ polka()
                     })
                   : typeof item.value === "string"
                   ? item.value.trim()
-                  : item.value || "<em>Unknown</em>"
+                  : item.value || ""
               }${
                 item.details
                   ? `, ${
