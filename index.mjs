@@ -9,7 +9,7 @@ import multer from "multer";
 import streamifier from "streamifier";
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { Octokit } from "@octokit/rest";
+import octokit from "@octokit/rest";
 import Airtable from "airtable";
 import ElasticSearch from "@elastic/elasticsearch";
 import axios from "axios";
@@ -59,7 +59,7 @@ const client = new ElasticSearch.Client({
   node: `https://${process.env.AWS_ELASTIC_HOST}`,
 });
 
-const github = new Octokit({
+const github = new octokit.Octokit({
   auth: GITHUB_PAT,
 });
 
