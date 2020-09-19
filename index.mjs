@@ -139,7 +139,7 @@ const createAirtableRow = (apartmentId) =>
       .then((lead) => {
         if (lead && lead.data) leadName = lead.data.title;
       })
-      .catch(() => {})
+      .catch(console.log)
       .then(
         base("Inventory").create([
           {
@@ -516,7 +516,7 @@ polka()
         content: Buffer.from(JSON.stringify(data, null, 2)).toString("base64"),
       })
       .then(() => {})
-      .catch(() => {});
+      .catch(console.log);
 
     delete data.userId;
     delete data.sessionId;
@@ -692,14 +692,14 @@ polka()
             finalConceptDate
           )
             .then(() => {})
-            .catch(() => {});
+            .catch(console.log);
         } catch (error) {}
       })
       .then(() => {
         try {
           createAirtableRow(req.params.id)
             .then(() => {})
-            .catch(() => {});
+            .catch(console.log);
         } catch (error) {}
       })
       .then(() => {
