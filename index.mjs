@@ -9,7 +9,7 @@ import multer from "multer";
 import streamifier from "streamifier";
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import Octokit from "@octokit/rest";
+import { Octokit } from "@octokit/rest";
 import Airtable from "airtable";
 import ElasticSearch from "@elastic/elasticsearch";
 import axios from "axios";
