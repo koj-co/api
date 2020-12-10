@@ -330,7 +330,7 @@ polka()
     const data = { ...req.query, ...req.body, date: new Date() };
 
     //bcrypt.compare(data.password, ROOT_PASSWORD, function (err, result) {
-      if (data.username === ROOT_USERNAME) {
+      if (data.username === ROOT_USERNAME && data.password === ROOT_PASSWORD) {
         res.end(
           JSON.stringify({
             success: true,
